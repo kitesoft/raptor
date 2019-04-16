@@ -2,16 +2,20 @@ use std::sync::{Arc, Mutex};
 
 use crate::market::bitflyer::boards::BitflyerBoards;
 use crate::market::bitflyer::execution::BitflyerExecution;
-use crate::types::market::{Market, Boards, Execution, Order, ProductCode, Side, OrderType};
+use crate::types::atomic::{Boards, Execution, Order, ProductCode, Side, OrderType};
+use crate::types::market::Market;
+use crate::types::algo::Algo;
 
 pub struct BitFlyer {
     client: reqwest::Client,
     endpoint: String,
     limit: i64,
+    algos: Vec<Box<Algo>>,
     product_code: ProductCode,
 }
 
 impl Market for BitFlyer {
+    // TODO 色んな所からupdate, executionsとかを参照されても,過去に取得していればそれを返すようにする
     // TODO product_codeの変換
     // TODO APIの通信にproduct_codeを含める
 
@@ -21,7 +25,8 @@ impl Market for BitFlyer {
             client: reqwest::Client::new(),
             endpoint: String::from("https://api.bitflyer.com/v1/"),
             limit: 500,
-            product_code: ProductCode::BTC_JPY,
+            product_code: ProductCode::BtcJpy,
+            algos: vec!(),
         }))
     }
 
@@ -39,7 +44,13 @@ impl Market for BitFlyer {
 
     fn orders(&mut self) -> Result<Vec<Order>, reqwest::Error> {
         // TODO 実装する
-        Ok(vec!(Order{id: String::from("id"),order_type: OrderType::Market, side: Side::Buy, price: 1.0, size: 1.0}))
+        Ok(vec!(Order{
+            id: String::from("id"),
+            order_type: OrderType::Market,
+            side: Side::Buy,
+            price: 1.0,
+            size: 1.0
+        }))
     }
 
     fn send_order(&self, order: Order) -> Result<Order, reqwest::Error> {
@@ -50,5 +61,9 @@ impl Market for BitFlyer {
     fn cancel_order(&self, order: Order) -> Result<Order, reqwest::Error> {
         // TODO 実装する
         Ok(order)
+    }
+
+    fn get_algos(&mut self) -> &mut Vec<Box<Algo>> {
+        &mut self.algos
     }
 }

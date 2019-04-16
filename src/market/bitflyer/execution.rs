@@ -1,7 +1,8 @@
 use chrono::prelude::*;
 
 use crate::utils::market::parse_side;
-use crate::types::market::{Side, MarketExecutions};
+use crate::types::atomic::MarketExecutions;
+use crate::types::atomic::Side;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BitflyerExecution {

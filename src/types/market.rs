@@ -1,79 +1,7 @@
 use std::sync::{Arc, Mutex};
-use chrono::prelude::*;
 
-// TODO 大きすぎるので分割する
-
-#[derive(Debug, Clone)]
-pub enum Side {
-    Buy,
-    Sell,
-}
-
-#[derive(Debug, Clone)]
-pub enum OrderType {
-    Market,
-    Limit,
-}
-
-pub enum ProductCode {
-    BTC_JPY,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Board {
-    pub price: f64,
-    pub size: f64,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Boards {
-    pub bid: Vec<Board>,
-    pub ask: Vec<Board>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Execution {
-    pub side: Side,
-    pub price: f64,
-    pub size: f64,
-    pub exec_date: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Order {
-    pub id: String,
-    pub order_type: OrderType,
-    pub side: Side,
-    pub price: f64,
-    pub size: f64,
-}
-
-pub trait MarketOrder {
-    fn id(&self) -> String;
-    fn order_type(&self) -> OrderType;
-    fn side(&self) -> Side;
-    fn price(&self) -> f64;
-    fn size(&self) -> f64;
-}
-
-pub trait MarketExecutions {
-    fn side(&self) -> Side;
-    fn price(&self) -> f64;
-    fn size(&self) -> f64;
-    fn exec_date(&self) -> DateTime<Utc>;
-}
-
-pub trait MarketBoard {
-    fn price(&self) -> f64;
-    fn size(&self) -> f64;
-}
-
-pub trait MarketBoards<T>
-where T: MarketBoard
-{
-    fn bids(&self) -> Vec<T>;
-    fn asks(&self) -> Vec<T>;
-}
+use crate::types::algo::Algo;
+use crate::types::atomic::{Order, Board, Boards, Execution, MarketOrder, MarketExecutions, MarketBoard, MarketBoards};
 
 pub trait Market {
     fn new() -> Arc<Mutex<Self>>;
@@ -86,6 +14,12 @@ pub trait Market {
     // Actions
     fn send_order(&self, order: Order) -> Result<Order, reqwest::Error>;
     fn cancel_order(&self, order: Order) -> Result<Order, reqwest::Error>;
+
+    // Getter, Setter
+    fn get_algos(&mut self) -> &mut Vec<Box<Algo>>;
+
+    // Observer
+    fn register<T>(&mut self, algo: Box<T>) where T: Algo + 'static { self.get_algos().push(algo); } // TODO lifetimeのstaticをやめる
 
     // Converter
     fn to_order<T>(&self, order: T) -> Order where T: MarketOrder {

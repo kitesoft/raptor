@@ -1,4 +1,4 @@
-use crate::types::market::Side;
+use crate::types::atomic::Side;
 
 pub fn parse_side(side: &str) -> Side {
     if side.to_lowercase() == "buy" {

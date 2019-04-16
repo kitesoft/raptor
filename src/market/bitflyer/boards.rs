@@ -1,4 +1,4 @@
-use crate::types::market::{MarketBoard, MarketBoards};
+use crate::types::atomic::{MarketBoard, MarketBoards};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BitflyerBoard {
