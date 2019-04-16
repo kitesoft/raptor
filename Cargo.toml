@@ -1,5 +1,5 @@
 [package]
-name = "raptor-bot"
+name = "raptor"
 version = "0.1.0"
 authors = ["mute1997 <mute1008@gmail.com>"]
 edition = "2018"
