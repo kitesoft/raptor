@@ -1,6 +1,6 @@
 use chrono::prelude::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Side {
     Buy,
     Sell,

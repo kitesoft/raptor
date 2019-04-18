@@ -1,7 +1,8 @@
 use std::sync::{Arc, Mutex};
 
-use crate::market::bitflyer::boards::BitflyerBoards;
-use crate::market::bitflyer::execution::BitflyerExecution;
+use crate::market::bitflyer::boards::BitFlyerBoards;
+use crate::market::bitflyer::execution::BitFlyerExecution;
+use crate::market::bitflyer::utils::BitFlyerUtils;
 use crate::types::atomic::{Boards, Execution, Order, ProductCode, Side, OrderType};
 use crate::types::market::Market;
 use crate::types::algo::Algo;
@@ -12,6 +13,8 @@ pub struct BitFlyer {
     limit: i64,
     algos: Vec<Box<Algo>>,
     product_code: ProductCode,
+    api_key: String,
+    api_secret: String,
 }
 
 impl Market for BitFlyer {
@@ -23,22 +26,25 @@ impl Market for BitFlyer {
         Arc::new(Mutex::new(BitFlyer{
             // TODO 定数はファイルとかから取ってくるようにする (lazy_static?)
             client: reqwest::Client::new(),
+            algos: vec!(),
+            product_code: ProductCode::BtcJpy,
+
             endpoint: String::from("https://api.bitflyer.com/v1/"),
             limit: 500,
-            product_code: ProductCode::BtcJpy,
-            algos: vec!(),
+            api_key: String::from(""),
+            api_secret: String::from(""),
         }))
     }
 
     fn boards(&mut self) -> Result<Boards, reqwest::Error> {
         let url: &str = &format!("{}{}", self.endpoint, "/board");
-        let res: BitflyerBoards = self.client.get(url).send()?.json()?;
+        let res: BitFlyerBoards = self.client.get(url).send()?.json()?;
         Ok(self.to_boards(res))
     }
 
     fn executions(&mut self) -> Result<Vec<Execution>, reqwest::Error> {
         let url: &str = &format!("{}{}", self.endpoint, "/executions");
-        let res: Vec<BitflyerExecution> = self.client.get(url).send()?.json()?;
+        let res: Vec<BitFlyerExecution> = self.client.get(url).send()?.json()?;
         Ok(self.to_executions(res))
     }
 
@@ -54,6 +60,7 @@ impl Market for BitFlyer {
     }
 
     fn send_order(&self, order: Order) -> Result<Order, reqwest::Error> {
+        // let _ = BitFlyerUtils::get_header();
         // TODO 実装する
         Ok(order)
     }
@@ -65,5 +72,16 @@ impl Market for BitFlyer {
 
     fn get_algos(&mut self) -> &mut Vec<Box<Algo>> {
         &mut self.algos
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bitflyer() {
+        // TODO reqwestをモックしてテストを書く
+        let _ = BitFlyer::new();
     }
 }

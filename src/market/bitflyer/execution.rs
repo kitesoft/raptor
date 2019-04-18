@@ -5,7 +5,7 @@ use crate::types::atomic::MarketExecutions;
 use crate::types::atomic::Side;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BitflyerExecution {
+pub struct BitFlyerExecution {
     pub id: i64,
     pub side: String,
     pub price: f64,
@@ -15,7 +15,7 @@ pub struct BitflyerExecution {
     pub sell_child_order_acceptance_id: String,
 }
 
-impl MarketExecutions for BitflyerExecution {
+impl MarketExecutions for BitFlyerExecution {
     fn side(&self) -> Side {parse_side(&self.side)}
     fn price(&self) -> f64 {self.price}
     fn size(&self) -> f64 {self.size}
