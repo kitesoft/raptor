@@ -7,4 +7,3 @@ extern crate toml;
 
 pub mod market;
 pub mod types;
-pub mod utils;
