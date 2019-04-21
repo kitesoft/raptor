@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 
 use crate::utils::market::parse_side;
-use crate::types::atomic::MarketExecutions;
+use crate::types::atomic::MarketExecution;
 use crate::types::atomic::Side;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,7 +15,7 @@ pub struct BitFlyerExecution {
     pub sell_child_order_acceptance_id: String,
 }
 
-impl MarketExecutions for BitFlyerExecution {
+impl MarketExecution for BitFlyerExecution {
     fn side(&self) -> Side {parse_side(&self.side)}
     fn price(&self) -> f64 {self.price}
     fn size(&self) -> f64 {self.size}

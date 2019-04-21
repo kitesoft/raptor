@@ -1,8 +1,8 @@
-extern crate lazy_static;
 extern crate chrono;
 extern crate reqwest;
-extern crate hmac;
-extern crate sha2;
+extern crate crypto;
+extern crate serde_json;
+extern crate toml;
 #[macro_use] extern crate serde_derive;
 
 pub mod market;

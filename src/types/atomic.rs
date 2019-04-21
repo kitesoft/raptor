@@ -1,19 +1,23 @@
 use chrono::prelude::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub enum Side {
     Buy,
     Sell,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum OrderType {
     Market,
     Limit,
+    None,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ProductCode {
     BtcJpy,
+    FxBtcJpy,
+    None,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -40,6 +44,7 @@ pub struct Execution {
 pub struct Order {
     pub id: String,
     pub order_type: OrderType,
+    pub product_code: ProductCode,
     pub side: Side,
     pub price: f64,
     pub size: f64,
@@ -48,12 +53,13 @@ pub struct Order {
 pub trait MarketOrder {
     fn id(&self) -> String;
     fn order_type(&self) -> OrderType;
+    fn product_code(&self) -> ProductCode;
     fn side(&self) -> Side;
     fn price(&self) -> f64;
     fn size(&self) -> f64;
 }
 
-pub trait MarketExecutions {
+pub trait MarketExecution {
     fn side(&self) -> Side;
     fn price(&self) -> f64;
     fn size(&self) -> f64;

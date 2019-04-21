@@ -1,52 +1,41 @@
 use chrono::prelude::*;
-use sha2::Sha256;
-use hmac::{Hmac, Mac};
+use crypto::sha2::Sha256;
+use crypto::hmac::Hmac;
+use crypto::mac::Mac;
+use reqwest::header::{HeaderMap};
 
 pub struct BitFlyerUtils {}
 
 impl BitFlyerUtils {
-    pub fn get_header(api_key: &'static str, api_secret: &'static str, method: &'static str, path: &'static str, body: &'static str) {
+    fn sign(input: String, key: String) -> String {
+        let mut hmac = Hmac::new(Sha256::new(), key.as_bytes());
+        hmac.input(input.as_bytes());
+        hmac.result().code().iter().map(|n| format!("{:02x}", n)).collect::<String>()
+    }
+
+    pub fn get_header(api_key: &str, api_secret: &str, method: &str, path: &str, body: &str) -> HeaderMap {
+        let mut headers = HeaderMap::new();
         let timestamp = Utc::now().timestamp().to_string();
-        let text = format!("{}{}{}{}", timestamp, method, path, body);
-        let mut mac = Hmac<Sha256>::new_varkey(b"my secret and secure key") .expect("HMAC can take key of any size");
-        mac.input(text.as_bytes());
-        let sign = mac.result();
+        let sign = BitFlyerUtils::sign(format!("{}{}{}{}", timestamp, method, path, body), String::from(api_secret));
+
+        headers.insert("ACCESS-KEY",       api_key.parse().unwrap());
+        headers.insert("ACCESS-TIMESTAMP", timestamp.parse().unwrap());
+        headers.insert("ACCESS-SIGN",      sign.parse().unwrap());
+        headers.insert("Content-Type",     "application/json".parse().unwrap());
+
+        headers
     }
 }
-
-// var timestamp = Date.now().toString();
-// var method = 'POST';
-// var path = '/v1/me/sendchildorder';
-// var body = JSON.stringify({
-//     product_code: 'BTC_JPY',
-//     child_order_type: 'LIMIT',
-//     side: 'BUY',
-//     price: 30000,
-//     size: 0.1
-// });
-//
-// var text = timestamp + method + path + body;
-// var sign = crypto.createHmac('sha256', secret).update(text).digest('hex');
-//
-// var options = {
-//     url: 'https://api.bitflyer.com' + path,
-//     method: method,
-//     body: body,
-//     headers: {
-//         'ACCESS-KEY': key,
-//         'ACCESS-TIMESTAMP': timestamp,
-//         'ACCESS-SIGN': sign,
-//         'Content-Type': 'application/json'
-//     }
-// };
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_get_header() {
-        // TODO get_header
-        BitFlyerUtils::get_header("", "", "", "", "");
+    fn test_sign() {
+        let expected = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad";
+        let input = "".to_string();
+        let key = "".to_string();
+        assert_eq!(expected, BitFlyerUtils::sign(input, key));
     }
 }
