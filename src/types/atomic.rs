@@ -13,13 +13,6 @@ pub enum OrderType {
     None,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum ProductCode {
-    BtcJpy,
-    FxBtcJpy,
-    None,
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Board {
     pub price: f64,
@@ -44,7 +37,6 @@ pub struct Execution {
 pub struct Order {
     pub id: String,
     pub order_type: OrderType,
-    pub product_code: ProductCode,
     pub side: Side,
     pub price: f64,
     pub size: f64,
@@ -53,7 +45,6 @@ pub struct Order {
 pub trait MarketOrder {
     fn id(&self) -> String;
     fn order_type(&self) -> OrderType;
-    fn product_code(&self) -> ProductCode;
     fn side(&self) -> Side;
     fn price(&self) -> f64;
     fn size(&self) -> f64;
