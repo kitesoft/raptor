@@ -19,8 +19,8 @@ pub struct BitFlyer {
 }
 
 impl Market for BitFlyer {
-    fn get_market_name(&self) -> String {
-        "BitFlyer".to_string()
+    fn unique_id(&self) -> String {
+        format!("BitFlyer{}{}{}{}", self.endpoint, self.api_key, self.api_secret, self.product_code)
     }
 
     fn boards(&self) -> Result<Boards, Box<Error>> {
