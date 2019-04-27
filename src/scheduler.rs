@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::error::Error;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -34,45 +35,51 @@ impl Scheduler {
         self.markets.insert(market.unique_id(), market);
     }
 
-    pub fn tick(&mut self) {
+    pub fn run(&mut self) {
+        loop {self.tick();}
+    }
+
+    fn tick(&mut self) {
         let _ = crossbeam::scope(|scope| {
 
             let mut handles = vec!();
 
             for id in &self.ids {
-                let market = self.markets.get(id).unwrap(); // TODO remove unwrap
-                let algos = self.algos.get(id).unwrap(); // TODO remove unwrap
-                let tick = self.get_tick(id);
+                let market = self.markets.get(id).unwrap();
+                let algos = self.algos.get(id).unwrap();
+                let tick = self.get_tick(id).unwrap();
 
                 let handle = scope.spawn(move |_| {
-                    Scheduler::spawn_algos_and_join(market, algos, tick);
+                    let _ = Scheduler::spawn_algos_and_join(market, algos, tick);
                     market.unique_id()
                 });
                 handles.push(handle);
-
             }
 
             for handle in handles {
-                let id = handle.join().unwrap(); // TODO remove unwrap
+                let id = handle.join().unwrap();
                 self.last_sched_at.insert(id, Instant::now());
             }
+
         });
     }
 
-    fn get_tick(&self, market_id: &MarketID) -> Duration {
-        let market = self.markets.get(market_id).unwrap(); // TODO remove unwrap
-        let last_sched_at = self.last_sched_at.get(&market.unique_id()).unwrap(); // remove unwrap
-        let ticks = self.ticks.get(&market.unique_id()).unwrap(); // TODO remove unwrap
+    fn get_tick(&self, market_id: &MarketID) -> Option<Duration> {
+        let last_sched_at = self.last_sched_at.get(market_id)?;
+        let ticks = self.ticks.get(market_id)?;
         let duration = Instant::now().duration_since(*last_sched_at);
-        *ticks - duration
+
+        Some(*ticks - duration)
     }
 
-    fn spawn_algos_and_join(market: &Box<Market + Sync + Send>, algos: &Vec<Box<Algo + Sync + Send>>, tick: Duration) {
+    fn spawn_algos_and_join(market: &Box<Market + Sync + Send>, algos: &Vec<Box<Algo + Sync + Send>>, tick: Duration) -> Result<(), Box<Error>> {
         // sleep next tick
         sleep(tick);
 
+        // get market state
+        let state = State::new(market)?;
+
         // spawn algos
-        let state = State::new(market);
         let _ = crossbeam::scope(|scope| {
             let mut handles = vec!();
 
@@ -85,6 +92,10 @@ impl Scheduler {
 
             // wait for finish algos
             for handle in handles {let _ = handle.join();}
+
         });
+        Ok(())
     }
 }
+
+// TODO テストを書く

@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::hash::{Hash, Hasher};
 
 use crate::types::atomic::{Order, Boards, Execution};
 

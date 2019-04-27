@@ -75,7 +75,7 @@ impl Market for BitFlyer {
             price: order.price,
             size: order.size,
         };
-        let body = serde_json::to_string(&params).unwrap();
+        let body = serde_json::to_string(&params)?;
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
         let url: &str = &format!("{}{}", self.endpoint, path);
 
@@ -98,7 +98,7 @@ impl Market for BitFlyer {
             product_code: self.product_code.clone(),
             child_order_acceptance_id: order.id.clone(),
         };
-        let body = serde_json::to_string(&params).unwrap();
+        let body = serde_json::to_string(&params)?;
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
         let url: &str = &format!("{}{}", self.endpoint, path);
 
