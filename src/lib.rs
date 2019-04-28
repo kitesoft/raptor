@@ -4,7 +4,6 @@ extern crate serde_yaml;
 extern crate chrono;
 extern crate reqwest;
 extern crate crypto;
-extern crate toml;
 extern crate crossbeam;
 
 pub mod market;

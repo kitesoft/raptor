@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::thread::sleep;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use crate::types::market::Market;
@@ -50,7 +51,10 @@ impl Scheduler {
                 let tick = self.get_tick(id).unwrap();
 
                 let handle = scope.spawn(move |_| {
-                    let _ = Scheduler::spawn_algos_and_join(market, algos, tick);
+                    Scheduler::spawn_algos_and_join(market, algos, tick).unwrap_or_else(|e| {
+                        let error = Arc::new(e);
+                        for algo in algos {algo.on_error(error.clone());} // notify error to algo
+                    });
                     market.unique_id()
                 });
                 handles.push(handle);
@@ -89,7 +93,7 @@ impl Scheduler {
             for algo in algos {
                 let s = state.clone();
                 let action = Action::new(market);
-                let handle = scope.spawn(move |_| {algo.ticker(&s, &action);}); // TODO set deadline
+                let handle = scope.spawn(move |_| {algo.on_update(&s, &action);}); // TODO set deadline
                 handles.push(handle);
             }
 
@@ -97,6 +101,7 @@ impl Scheduler {
             for handle in handles {let _ = handle.join();}
 
         });
+
         Ok(())
     }
 }

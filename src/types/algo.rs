@@ -1,9 +1,10 @@
 use std::error::Error;
+use std::sync::Arc;
 
 use crate::types::atomic::{Order, Boards, Execution};
 use crate::types::market::Market;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub boards: Boards,
     pub executions: Vec<Execution>,
@@ -43,5 +44,6 @@ impl<'a> Action<'a> {
 
 pub trait Algo
 {
-    fn ticker(&self, state: &State, action: &Action);
+    fn on_update(&self, state: &State, action: &Action);
+    fn on_error(&self, e: Arc<Box<Error>>);
 }
