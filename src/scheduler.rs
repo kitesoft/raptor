@@ -66,10 +66,13 @@ impl Scheduler {
 
     fn get_tick(&self, market_id: &MarketID) -> Option<Duration> {
         let last_sched_at = self.last_sched_at.get(market_id)?;
-        let ticks = self.ticks.get(market_id)?;
+        let tick = self.ticks.get(market_id)?;
         let duration = Instant::now().duration_since(*last_sched_at);
 
-        Some(*ticks - duration)
+        match tick.checked_sub(duration) {
+            Some(t) => Some(t),
+            _ => Some(Duration::new(0, 0)),
+        }
     }
 
     fn spawn_algos_and_join(market: &Box<Market + Sync + Send>, algos: &Vec<Box<Algo + Sync + Send>>, tick: Duration) -> Result<(), Box<Error>> {
