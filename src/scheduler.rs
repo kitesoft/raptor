@@ -37,6 +37,11 @@ impl Scheduler {
     }
 
     pub fn run(&mut self) {
+        // call on_init
+        for (_, algos) in &self.algos {
+            for algo in algos {algo.on_init()}
+        }
+
         loop {self.tick();}
     }
 
