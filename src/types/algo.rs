@@ -44,6 +44,7 @@ impl<'a> Action<'a> {
 
 pub trait Algo
 {
+    fn on_init(&self);
     fn on_update(&self, state: &State, action: &Action);
     fn on_error(&self, e: Arc<Box<Error>>);
 }
