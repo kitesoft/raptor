@@ -1,12 +1,12 @@
 use chrono::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize)]
 pub enum Side {
     Buy,
     Sell,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum OrderType {
     Market,
     Limit,
@@ -25,7 +25,7 @@ pub struct Boards {
     pub ask: Vec<Board>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Execution {
     pub side: Side,
     pub price: f64,
@@ -33,7 +33,7 @@ pub struct Execution {
     pub exec_date: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Order {
     pub id: String,
     pub order_type: OrderType,

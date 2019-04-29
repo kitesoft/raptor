@@ -11,7 +11,7 @@ use crate::types::atomic::{Boards, Execution, Order};
 use crate::types::market::Market;
 use crate::utils::market::MarketUtils;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct BitFlyer {
     pub endpoint: String,
     pub api_key: String,
