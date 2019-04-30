@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::sync::Arc;
 
-use crate::types::atomic::{Order, Boards, Execution};
+use crate::types::atomic::{Order, Boards, Execution, Asset};
 use crate::types::market::Market;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,6 +9,7 @@ pub struct State {
     pub boards: Boards,
     pub executions: Vec<Execution>,
     pub orders: Vec<Order>,
+    pub assets: Vec<Asset>,
 }
 
 impl State {
@@ -17,12 +18,14 @@ impl State {
         let boards = market.boards()?;
         let executions = market.executions()?;
         let orders = market.orders()?;
+        let assets = market.assets()?;
 
         Ok(
             State{
                 boards: boards,
                 executions: executions,
                 orders: orders,
+                assets: assets,
             }
         )
     }
@@ -47,4 +50,5 @@ pub trait Algo
     fn on_init(&self);
     fn on_update(&self, state: &State, action: &Action);
     fn on_error(&self, e: Arc<Box<Error>>);
+    fn on_destroy(&self);
 }

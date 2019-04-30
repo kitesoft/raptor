@@ -1,4 +1,4 @@
-use crate::types::atomic::{Order, Board, Boards, Execution, MarketOrder, MarketExecution, MarketBoard, MarketBoards};
+use crate::types::atomic::{Order, Board, Boards, Execution, Asset, MarketOrder, MarketExecution, MarketBoard, MarketBoards, MarketAsset};
 
 pub struct MarketUtils {}
 
@@ -56,5 +56,16 @@ impl MarketUtils {
             bid: MarketUtils::to_board(board.bids()),
             ask: MarketUtils::to_board(board.asks()),
         }
+    }
+
+    pub fn to_assets<T>(assets: Vec<T>) -> Vec<Asset> where T: MarketAsset + Clone {
+        let mut items: Vec<Asset> = vec!();
+        for item in assets {
+            items.push(Asset{
+                currency: item.currency(),
+                amount: item.amount(),
+            })
+        }
+        items
     }
 }

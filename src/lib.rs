@@ -5,6 +5,7 @@ extern crate chrono;
 extern crate reqwest;
 extern crate crypto;
 extern crate crossbeam;
+extern crate signal_hook;
 
 pub mod market;
 pub mod types;

@@ -1,13 +1,15 @@
 use std::error::Error;
+
 use reqwest::Client;
 use serde_json;
 
 use crate::market::bitflyer::boards::BitFlyerBoards;
 use crate::market::bitflyer::execution::BitFlyerExecution;
-use crate::market::bitflyer::order::{BitFlyerOrder};
+use crate::market::bitflyer::order::BitFlyerOrder;
+use crate::market::bitflyer::asset::BitFlyerAsset;
 use crate::market::bitflyer::params::{SendOrderParam, SendOrderResponse, CancelOrderParam};
 use crate::market::bitflyer::utils::BitFlyerUtils;
-use crate::types::atomic::{Boards, Execution, Order};
+use crate::types::atomic::{Boards, Execution, Order, Asset};
 use crate::types::market::Market;
 use crate::utils::market::MarketUtils;
 
@@ -61,6 +63,21 @@ impl Market for BitFlyer {
         let json: Result<Vec<BitFlyerOrder>, serde_json::Error> = serde_json::from_str(&text);
         match json {
             Ok(res) => return Ok(MarketUtils::to_orders(res)),
+            Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
+        }
+    }
+
+    fn assets(&self) -> Result<Vec<Asset>, Box<Error>> {
+        let client = Client::new();
+        let method = "GET";
+        let path = &format!("/v1/me/getbalance");
+        let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
+        let url: &str = &format!("{}{}", self.endpoint, path);
+
+        let text = client.get(url).headers(headers).send()?.text()?;
+        let json: Result<Vec<BitFlyerAsset>, serde_json::Error> = serde_json::from_str(&text);
+        match json {
+            Ok(res) => return Ok(MarketUtils::to_assets(res)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
         }
     }
