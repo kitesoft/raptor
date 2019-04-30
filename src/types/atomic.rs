@@ -25,7 +25,7 @@ pub struct Boards {
     pub ask: Vec<Board>,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Execution {
     pub side: Side,
     pub price: f64,

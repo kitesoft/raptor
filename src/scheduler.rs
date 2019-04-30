@@ -84,31 +84,28 @@ impl Scheduler {
         }
     }
 
+    // std::boxed::Box<(dyn std::any::Any + std::marker::Send + 'static)>>`
     fn spawn_algos_and_join(market: &Box<Market + Sync + Send>, algos: &Vec<Box<Algo + Sync + Send>>, tick: Duration) -> Result<(), Box<Error>> {
         // sleep next tick
         sleep(tick);
 
-        // get market state
-        let state = State::new(market)?;
-
         // spawn algos
-        let _ = crossbeam::scope(|scope| {
+        crossbeam::scope(|scope| -> Result<(), Box<Error>> {
             let mut handles = vec!();
 
             for algo in algos {
-                let s = state.clone();
+                let state = State::new(market)?;
                 let action = Action::new(market);
-                let handle = scope.spawn(move |_| {algo.on_update(&s, &action);}); // TODO set deadline
+                let handle = scope.spawn(move |_| {algo.on_update(&state, &action);}); // TODO set deadline
                 handles.push(handle);
             }
 
             // wait for finish algos
             for handle in handles {let _ = handle.join();}
 
-        });
-
-        Ok(())
-    }
+            Ok(())
+        }).unwrap_or_else(|_| {Ok(())})
+     }
 }
 
 // TODO テストを書く

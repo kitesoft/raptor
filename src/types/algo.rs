@@ -4,7 +4,7 @@ use std::sync::Arc;
 use crate::types::atomic::{Order, Boards, Execution};
 use crate::types::market::Market;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct State {
     pub boards: Boards,
     pub executions: Vec<Execution>,
@@ -34,7 +34,7 @@ pub struct Action<'a> {
 }
 
 impl<'a> Action<'a> {
-    pub fn new(market: &'a Box<Market + Sync + Send + 'a >) -> Self {
+    pub fn new(market: &'a Box<Market + Sync + Send + 'a>) -> Self {
         Action{
             send_order: Box::new(move |order: Order| {market.send_order(order)}),
             cancel_order: Box::new(move |order: Order| {market.cancel_order(order)}),
