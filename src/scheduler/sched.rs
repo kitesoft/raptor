@@ -33,12 +33,8 @@ impl Scheduler {
         loop {
             for task in &self.tasks {
                 let read_task = task.read().unwrap();
-
                 read_task.sched_in();
-                match read_task.sched() {
-                    Err(e) => read_task.sched_error(e),
-                    _ => {},
-                }
+                read_task.sched();
 
                 let mut write_task = task.write().unwrap();
                 write_task.sched_out();

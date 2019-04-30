@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::sync::Arc;
 
 use crate::types::atomic::{Order, Boards, Execution, Asset};
 use crate::types::market::Market;
@@ -49,6 +48,6 @@ pub trait Algo
 {
     fn on_init(&self);
     fn on_update(&self, state: &State, action: &Action);
-    fn on_error(&self, e: Arc<Box<Error>>);
+    fn on_error(&self, e: Box<Error>);
     fn on_destroy(&self);
 }

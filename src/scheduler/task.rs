@@ -1,7 +1,6 @@
-use std::error::Error;
 use std::thread::sleep;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
+use crossbeam_utils::thread;
 
 use crate::types::market::Market;
 use crate::types::algo::{Algo, Action, State};
@@ -28,10 +27,11 @@ impl Task {
     }
 
     pub fn sched_register(&self) {
-        // TODO マルチスレッド化する
-        for algo in &self.algos {
-            algo.on_init();
-        }
+        let _ = thread::scope(|s| {
+            for algo in &self.algos {
+                s.spawn(move |_| {algo.on_init();});
+            }
+        });
     }
 
     pub fn sched_in(&self) {
@@ -47,29 +47,29 @@ impl Task {
         self.last_sched_at = Instant::now();
     }
 
-    pub fn sched_error(&self, error: Box<Error>) {
-        // TODO マルチスレッド化する
-        let error = Arc::new(error);
-        for algo in &self.algos {
-            algo.on_error(error.clone());
-        }
-    }
-
     pub fn sched_drop(&self) {
-        // TODO マルチスレッド化する
-        for algo in &self.algos {
-            algo.on_destroy();
-        }
+        let _ = thread::scope(|s| {
+            for algo in &self.algos {
+                s.spawn(move |_| {algo.on_destroy();});
+            }
+        });
     }
 
-    pub fn sched(&self) -> Result<(), Box<Error>> {
-        // TODO マルチスレッド化する
-        for algo in &self.algos {
-            let state = State::new(&self.market)?;
-            let action = Action::new(&self.market);
-            algo.on_update(&state, &action);
-        }
-
-        Ok(())
+    pub fn sched(&self) {
+        let _ = thread::scope(|s| {
+            for algo in &self.algos {
+                s.spawn(move |_| {
+                    match State::new(&self.market) {
+                        Ok(state) => {
+                            let action = Action::new(&self.market);
+                            algo.on_update(&state, &action);
+                        },
+                        Err(e) => {
+                            algo.on_error(e);
+                        }
+                    }
+                });
+            }
+        });
     }
 }
