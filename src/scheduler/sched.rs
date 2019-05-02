@@ -32,12 +32,18 @@ impl Scheduler {
 
         loop {
             for task in &self.tasks {
-                let read_task = task.read().unwrap();
-                read_task.sched_in();
-                read_task.sched();
+                // readable scope
+                {
+                    let read_task = task.read().unwrap();
+                    read_task.sched_in();
+                    read_task.sched();
+                }
 
-                let mut write_task = task.write().unwrap();
-                write_task.sched_out();
+                // writable scope
+                {
+                    let mut write_task = task.write().unwrap();
+                    write_task.sched_out();
+                }
             }
         }
     }
