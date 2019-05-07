@@ -7,6 +7,7 @@ impl MarketUtils {
         Order{
             id: order.id(),
             order_type: order.order_type(),
+            order_status: order.order_status(),
             side: order.side(),
             price: order.price(),
             size: order.size(),
@@ -19,6 +20,7 @@ impl MarketUtils {
             items.push(Order{
                 id: item.id(),
                 order_type: item.order_type(),
+                order_status: item.order_status(),
                 side: item.side(),
                 price: item.price(),
                 size: item.size(),

@@ -1,4 +1,4 @@
-use crate::types::atomic::{MarketOrder, Side, OrderType};
+use crate::types::atomic::{MarketOrder, Side, OrderType, OrderStatus};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct BitFlyerOrder {
@@ -25,6 +25,16 @@ impl MarketOrder for BitFlyerOrder {
     fn price(&self) -> f64 {self.price}
     fn size(&self) -> f64 {self.size}
     fn side(&self) -> Side {if self.side == "BUY" {Side::Buy} else {Side::Sell}}
+
+    fn order_status(&self) -> OrderStatus {
+        match self.child_order_state.as_str() {
+            "ACTIVE" => return OrderStatus::Active,
+            "COMPLETED" => return OrderStatus::Completed,
+            "CANCELED" => return OrderStatus::Canceled,
+            "REJECTED" => return OrderStatus::Rejected,
+            _ => return OrderStatus::None,
+        }
+    }
 
     fn order_type(&self) -> OrderType {
         match self.child_order_type.as_str() {

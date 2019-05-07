@@ -6,10 +6,19 @@ pub enum Side {
     Sell,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum OrderType {
     Market,
     Limit,
+    None,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum OrderStatus {
+    Active,
+    Completed,
+    Canceled,
+    Rejected,
     None,
 }
 
@@ -41,10 +50,11 @@ pub struct Execution {
     pub exec_date: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Order {
     pub id: String,
     pub order_type: OrderType,
+    pub order_status: OrderStatus,
     pub side: Side,
     pub price: f64,
     pub size: f64,
@@ -59,6 +69,7 @@ pub struct Asset {
 pub trait MarketOrder {
     fn id(&self) -> String;
     fn order_type(&self) -> OrderType;
+    fn order_status(&self) -> OrderStatus;
     fn side(&self) -> Side;
     fn price(&self) -> f64;
     fn size(&self) -> f64;
