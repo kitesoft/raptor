@@ -3,7 +3,7 @@ High-speed trading library written in rust
 
 ## Usage
 Put this in your `Cargo.toml`:
-```
+```toml
 raptor = { path = "/path/to/raptor" }
 ```
 
