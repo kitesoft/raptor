@@ -15,7 +15,8 @@ use crate::utils::market::MarketUtils;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct BitFlyer {
-    pub endpoint: String,
+    pub url: String,
+    pub api_version: String,
     pub api_key: String,
     pub api_secret: String,
     pub product_code: String,
@@ -23,12 +24,12 @@ pub struct BitFlyer {
 
 impl Market for BitFlyer {
     fn unique_id(&self) -> String {
-        format!("BitFlyer{}{}{}{}", self.endpoint, self.api_key, self.api_secret, self.product_code)
+        format!("BitFlyer{}{}{}{}{}", self.url, self.api_version, self.api_key, self.api_secret, self.product_code)
     }
 
     fn boards(&self) -> Result<Boards, Box<Error>> {
         let client = Client::new();
-        let url: &str = &format!("{}{}", self.endpoint, "/v1/board");
+        let url: &str = &format!("{}/{}{}", self.url, self.api_version, "/board");
         let params = [("product_code", self.product_code.clone())];
 
         let text = client.get(url).query(&params).send()?.text()?;
@@ -41,7 +42,7 @@ impl Market for BitFlyer {
 
     fn executions(&self) -> Result<Vec<Execution>, Box<Error>> {
         let client = Client::new();
-        let url: &str = &format!("{}{}", self.endpoint, "/v1/executions");
+        let url: &str = &format!("{}/{}{}", self.url, self.api_version, "/executions");
         let params = [("product_code", self.product_code.clone())];
 
         let text = client.get(url).query(&params).send()?.text()?;
@@ -55,9 +56,9 @@ impl Market for BitFlyer {
     fn orders(&self) -> Result<Vec<Order>, Box<Error>> {
         let client = Client::new();
         let method = "GET";
-        let path = &format!("/v1/me/getchildorders?product_code={}", self.product_code);
+        let path = &format!("/{}/me/getchildorders?product_code={}", self.api_version, self.product_code);
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
-        let url: &str = &format!("{}{}", self.endpoint, path);
+        let url: &str = &format!("{}/{}", self.url, path);
 
         let text = client.get(url).headers(headers).send()?.text()?;
         let json: Result<Vec<BitFlyerOrder>, serde_json::Error> = serde_json::from_str(&text);
@@ -70,9 +71,9 @@ impl Market for BitFlyer {
     fn assets(&self) -> Result<Vec<Asset>, Box<Error>> {
         let client = Client::new();
         let method = "GET";
-        let path = &format!("/v1/me/getbalance");
+        let path = &format!("/{}/me/getbalance", self.api_version);
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
-        let url: &str = &format!("{}{}", self.endpoint, path);
+        let url: &str = &format!("{}/{}", self.url, path);
 
         let text = client.get(url).headers(headers).send()?.text()?;
         let json: Result<Vec<BitFlyerAsset>, serde_json::Error> = serde_json::from_str(&text);
@@ -85,7 +86,7 @@ impl Market for BitFlyer {
     fn send_order(&self, mut order: Order) -> Result<Order, Box<Error>> {
         let client = Client::new();
         let method = "POST";
-        let path = "/v1/me/sendchildorder";
+        let path = &format!("/{}/me/sendchildorder", self.api_version);
         let params = SendOrderParam{
             product_code: self.product_code.clone(),
             child_order_type: BitFlyerUtils::to_order_type(order.order_type)?,
@@ -95,7 +96,7 @@ impl Market for BitFlyer {
         };
         let body = serde_json::to_string(&params)?;
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
-        let url: &str = &format!("{}{}", self.endpoint, path);
+        let url: &str = &format!("{}/{}", self.url, path);
 
         let text = client.post(url).headers(headers).body(body).send()?.text()?;
         let json: Result<SendOrderResponse, serde_json::Error> = serde_json::from_str(&text);
@@ -111,14 +112,14 @@ impl Market for BitFlyer {
     fn cancel_order(&self, order: Order) -> Result<Order, Box<Error>> {
         let client = Client::new();
         let method = "POST";
-        let path = "/v1/me/cancelchildorder";
+        let path = &format!("/{}/me/cancelchildorder", self.api_version);
         let params = CancelOrderParam{
             product_code: self.product_code.clone(),
             child_order_acceptance_id: order.id.clone(),
         };
         let body = serde_json::to_string(&params)?;
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
-        let url: &str = &format!("{}{}", self.endpoint, path);
+        let url: &str = &format!("{}/{}", self.url, path);
 
         let text = client.post(url).headers(headers).body(body).send()?.text()?;
         let json: Result<SendOrderResponse, serde_json::Error> = serde_json::from_str(&text);
