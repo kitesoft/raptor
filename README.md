@@ -13,4 +13,8 @@ extern crate raptor;
 ```
 
 ## Example
-cargo run --example main
+```
+$ cp examples/.default.yml examples/config.yml
+$ vim examples/config.yml
+$ cargo run --example main
+```
