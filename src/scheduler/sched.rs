@@ -1,29 +1,35 @@
-use std::error::Error;
-use crate::scheduler::task::Task;
+use std::thread::sleep;
+use std::time::{Duration};
+
+use crate::types::algo::Algo;
 
 pub struct Scheduler {
-    tasks: Vec<Task>,
+    algos: Vec<Box<Algo>>,
+    tick: Duration,
 }
 
 impl Scheduler {
-    pub fn new() -> Self {
+    pub fn new(tick: Duration) -> Self {
         Scheduler{
-            tasks: vec!(),
+            algos: vec!(),
+            tick: tick
         }
     }
 
-    pub fn register(&mut self, task: Task) -> Result<(), Box<Error>> {
-        task.sched_register();
-        self.tasks.push(task);
-        Ok(())
+    pub fn register(&mut self, mut algo: Box<Algo>) {
+        algo.on_init();
+        self.algos.push(algo);
     }
 
     pub fn run(&mut self) {
+        // TODO deadline scheduling
         loop {
-            for task in &mut self.tasks {
-                task.sched_in();
-                task.sched();
-                task.sched_out();
+            for algo in &mut self.algos {
+                match algo.on_update() {
+                    Err(e) => algo.on_error(e),
+                    _ => {}
+                }
+                sleep(self.tick);
             }
         }
     }
