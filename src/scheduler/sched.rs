@@ -1,12 +1,8 @@
-use std::sync::{Arc, RwLock};
 use std::error::Error;
-use std::thread;
-use std::process::exit;
 use crate::scheduler::task::Task;
-use signal_hook::{iterator::Signals, SIGINT};
 
 pub struct Scheduler {
-    tasks: Vec<Arc<RwLock<Task>>>,
+    tasks: Vec<Task>,
 }
 
 impl Scheduler {
@@ -16,50 +12,19 @@ impl Scheduler {
         }
     }
 
-    pub fn register(&mut self, task: Arc<RwLock<Task>>) -> Result<(), Box<Error>> {
-        match &task.read() {
-            Ok(task) => {
-                task.sched_register();
-            }
-            _ => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Register failed"))),
-        }
-
+    pub fn register(&mut self, task: Task) -> Result<(), Box<Error>> {
+        task.sched_register();
         self.tasks.push(task);
         Ok(())
     }
-    pub fn run(&self) {
-        self.set_drop_handlers();
 
+    pub fn run(&mut self) {
         loop {
-            for task in &self.tasks {
-                // readable scope
-                {
-                    let read_task = task.read().unwrap();
-                    read_task.sched_in();
-                    read_task.sched();
-                }
-
-                // writable scope
-                {
-                    let mut write_task = task.write().unwrap();
-                    write_task.sched_out();
-                }
+            for task in &mut self.tasks {
+                task.sched_in();
+                task.sched();
+                task.sched_out();
             }
         }
-    }
-
-    fn set_drop_handlers(&self) {
-        let signals = Signals::new(&[SIGINT]).unwrap();
-        let tasks = self.tasks.clone();
-
-        thread::spawn(move || {
-            for _ in signals.forever() {
-                println!("   waiting for finish... (call on_destroy handlers.)");
-                for task in tasks {
-                    task.read().unwrap().sched_drop();
-                }
-                exit(0);
-            }
-        });
     }
 }

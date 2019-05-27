@@ -16,8 +16,4 @@ impl Algo for ExampleAlgo {
     fn on_error(&self, error: Box<Error>) {
         println!("{}", error);
     }
-
-    fn on_destroy(&self) {
-        println!("on_destroy handler");
-    }
 }

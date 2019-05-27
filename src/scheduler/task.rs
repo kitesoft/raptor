@@ -47,29 +47,17 @@ impl Task {
         self.last_sched_at = Instant::now();
     }
 
-    pub fn sched_drop(&self) {
-        let _ = thread::scope(|s| {
-            for algo in &self.algos {
-                s.spawn(move |_| {algo.on_destroy();});
+    pub fn sched(&mut self) {
+        for algo in &mut self.algos {
+            match State::new(&self.market) {
+                Ok(state) => {
+                    let action = Action::new(&self.market);
+                    algo.on_update(&state, &action);
+                },
+                Err(e) => {
+                    algo.on_error(e);
+                }
             }
-        });
-    }
-
-    pub fn sched(&self) {
-        let _ = thread::scope(|s| {
-            for algo in &self.algos {
-                s.spawn(move |_| {
-                    match State::new(&self.market) {
-                        Ok(state) => {
-                            let action = Action::new(&self.market);
-                            algo.on_update(&state, &action);
-                        },
-                        Err(e) => {
-                            algo.on_error(e);
-                        }
-                    }
-                });
-            }
-        });
+        }
     }
 }
