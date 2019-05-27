@@ -22,6 +22,7 @@ impl Scheduler {
     }
 
     pub fn run(&mut self) {
+        // TODO create beam thread
         // TODO deadline scheduling
         loop {
             for algo in &mut self.algos {
