@@ -1,8 +1,23 @@
+use reqwest::Client;
+use reqwest::Proxy;
+
 use crate::types::atomic::{Order, Board, Boards, Execution, Asset, MarketOrder, MarketExecution, MarketBoard, MarketBoards, MarketAsset};
 
 pub struct MarketUtils {}
 
 impl MarketUtils {
+    pub fn get_client(proxy: Option<Proxy>) -> Client {
+        match proxy {
+            Some(proxy) => {
+                match Client::builder().proxy(proxy).build() {
+                    Ok(client) => client,
+                    _ => Client::new(),
+                }
+            },
+            _ => Client::new(),
+        }
+    }
+
     pub fn to_order<T>(order: T) -> Order where T: MarketOrder {
         Order{
             id: order.id(),

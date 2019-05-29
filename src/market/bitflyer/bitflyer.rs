@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use reqwest::Client;
+use reqwest::Proxy;
 use serde_json;
 
 use crate::market::bitflyer::boards::BitFlyerBoards;
@@ -23,12 +24,8 @@ pub struct BitFlyer {
 }
 
 impl Market for BitFlyer {
-    fn unique_id(&self) -> String {
-        format!("BitFlyer{}{}{}{}{}", self.url, self.api_version, self.api_key, self.api_secret, self.product_code)
-    }
-
-    fn boards(&self) -> Result<Boards, Box<Error>> {
-        let client = Client::new();
+    fn boards(&self, proxy: Option<Proxy>) -> Result<Boards, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let url: &str = &format!("{}/{}{}", self.url, self.api_version, "/board");
         let params = [("product_code", self.product_code.clone())];
 
@@ -40,8 +37,8 @@ impl Market for BitFlyer {
         }
     }
 
-    fn executions(&self) -> Result<Vec<Execution>, Box<Error>> {
-        let client = Client::new();
+    fn executions(&self, proxy: Option<Proxy>) -> Result<Vec<Execution>, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let url: &str = &format!("{}/{}{}", self.url, self.api_version, "/executions");
         let params = [("product_code", self.product_code.clone())];
 
@@ -53,8 +50,8 @@ impl Market for BitFlyer {
         }
     }
 
-    fn orders(&self) -> Result<Vec<Order>, Box<Error>> {
-        let client = Client::new();
+    fn orders(&self, proxy: Option<Proxy>) -> Result<Vec<Order>, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let method = "GET";
         let path = &format!("/{}/me/getchildorders?product_code={}", self.api_version, self.product_code);
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
@@ -68,8 +65,8 @@ impl Market for BitFlyer {
         }
     }
 
-    fn assets(&self) -> Result<Vec<Asset>, Box<Error>> {
-        let client = Client::new();
+    fn assets(&self, proxy: Option<Proxy>) -> Result<Vec<Asset>, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let method = "GET";
         let path = &format!("/{}/me/getbalance", self.api_version);
         let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
@@ -83,8 +80,8 @@ impl Market for BitFlyer {
         }
     }
 
-    fn send_order(&self, mut order: Order) -> Result<Order, Box<Error>> {
-        let client = Client::new();
+    fn send_order(&self, proxy: Option<Proxy>, mut order: Order) -> Result<Order, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let method = "POST";
         let path = &format!("/{}/me/sendchildorder", self.api_version);
         let params = SendOrderParam{
@@ -109,8 +106,8 @@ impl Market for BitFlyer {
         }
     }
 
-    fn cancel_order(&self, order: Order) -> Result<Order, Box<Error>> {
-        let client = Client::new();
+    fn cancel_order(&self, proxy: Option<Proxy>, order: Order) -> Result<Order, Box<Error>> {
+        let client = MarketUtils::get_client(proxy);
         let method = "POST";
         let path = &format!("/{}/me/cancelchildorder", self.api_version);
         let params = CancelOrderParam{
