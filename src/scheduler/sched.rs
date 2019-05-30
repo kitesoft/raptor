@@ -1,37 +1,50 @@
 use std::thread::sleep;
+use std::sync::{Arc, RwLock};
 use std::time::{Duration};
 
 use crate::types::algo::Algo;
 
 pub struct Scheduler {
-    algos: Vec<Box<Algo>>,
-    tick: Duration,
+    algos: Vec<Arc<RwLock<Box<Algo + Send + Sync>>>>,
+    ticks: Vec<Duration>,
 }
 
 impl Scheduler {
-    pub fn new(tick: Duration) -> Self {
+    pub fn new() -> Self {
         Scheduler{
             algos: vec!(),
-            tick: tick
+            ticks: vec!() 
         }
     }
 
-    pub fn register(&mut self, mut algo: Box<Algo>) {
+    pub fn register(&mut self, mut algo: Box<Algo + Send + Sync>, tick: Duration) {
         algo.on_init();
-        self.algos.push(algo);
+        self.ticks.push(tick);
+        self.algos.push(Arc::new(RwLock::new(algo)));
     }
 
     pub fn run(&mut self) {
-        // TODO create beam thread
-        // TODO deadline scheduling
-        loop {
-            for algo in &mut self.algos {
-                match algo.on_update() {
-                    Err(e) => algo.on_error(e),
-                    _ => {}
-                }
-                sleep(self.tick);
+        crossbeam::scope(|scope| {
+            for idx in 0..self.algos.len() {
+                let algos = self.algos.clone();
+                let ticks = self.ticks.clone();
+                scope.spawn(move |_| {
+                    let algo = algos.get(idx).unwrap();
+                    let tick = ticks.get(idx).unwrap();
+                    match algo.write() {
+                        Ok(mut algo) => {
+                            loop {
+                                match algo.on_update() {
+                                    Err(e) => algo.on_error(e),
+                                    _ => {},
+                                }
+                                sleep(*tick);
+                            }
+                        }
+                        _ => {},
+                    }
+                });
             }
-        }
+        });
     }
 }

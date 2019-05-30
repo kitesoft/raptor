@@ -1,16 +1,13 @@
 use std::error::Error;
 
-use reqwest::Client;
 use reqwest::Proxy;
 use serde_json;
 
 use crate::market::bitflyer::boards::BitFlyerBoards;
 use crate::market::bitflyer::execution::BitFlyerExecution;
 use crate::market::bitflyer::order::BitFlyerOrder;
-use crate::market::bitflyer::asset::BitFlyerAsset;
-use crate::market::bitflyer::params::{SendOrderParam, SendOrderResponse, CancelOrderParam};
 use crate::market::bitflyer::utils::BitFlyerUtils;
-use crate::types::atomic::{Boards, Execution, Order, Asset};
+use crate::types::atomic::{Boards, Execution, Order};
 use crate::types::market::Market;
 use crate::utils::market::MarketUtils;
 
@@ -61,67 +58,6 @@ impl Market for BitFlyer {
         let json: Result<Vec<BitFlyerOrder>, serde_json::Error> = serde_json::from_str(&text);
         match json {
             Ok(res) => return Ok(MarketUtils::to_orders(res)),
-            Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
-        }
-    }
-
-    fn assets(&self, proxy: Option<Proxy>) -> Result<Vec<Asset>, Box<Error>> {
-        let client = MarketUtils::get_client(proxy);
-        let method = "GET";
-        let path = &format!("/{}/me/getbalance", self.api_version);
-        let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, "");
-        let url: &str = &format!("{}/{}", self.url, path);
-
-        let text = client.get(url).headers(headers).send()?.text()?;
-        let json: Result<Vec<BitFlyerAsset>, serde_json::Error> = serde_json::from_str(&text);
-        match json {
-            Ok(res) => return Ok(MarketUtils::to_assets(res)),
-            Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
-        }
-    }
-
-    fn send_order(&self, proxy: Option<Proxy>, mut order: Order) -> Result<Order, Box<Error>> {
-        let client = MarketUtils::get_client(proxy);
-        let method = "POST";
-        let path = &format!("/{}/me/sendchildorder", self.api_version);
-        let params = SendOrderParam{
-            product_code: self.product_code.clone(),
-            child_order_type: BitFlyerUtils::to_order_type(order.order_type)?,
-            side: BitFlyerUtils::to_side(order.side)?,
-            price: order.price,
-            size: order.size,
-        };
-        let body = serde_json::to_string(&params)?;
-        let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
-        let url: &str = &format!("{}/{}", self.url, path);
-
-        let text = client.post(url).headers(headers).body(body).send()?.text()?;
-        let json: Result<SendOrderResponse, serde_json::Error> = serde_json::from_str(&text);
-        match json {
-            Ok(res) => {
-                order.id = res.child_order_acceptance_id;
-                return Ok(order);
-            },
-            Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
-        }
-    }
-
-    fn cancel_order(&self, proxy: Option<Proxy>, order: Order) -> Result<Order, Box<Error>> {
-        let client = MarketUtils::get_client(proxy);
-        let method = "POST";
-        let path = &format!("/{}/me/cancelchildorder", self.api_version);
-        let params = CancelOrderParam{
-            product_code: self.product_code.clone(),
-            child_order_acceptance_id: order.id.clone(),
-        };
-        let body = serde_json::to_string(&params)?;
-        let headers = BitFlyerUtils::get_header(&self.api_key, &self.api_secret, method, path, &body);
-        let url: &str = &format!("{}/{}", self.url, path);
-
-        let text = client.post(url).headers(headers).body(body).send()?.text()?;
-        let json: Result<SendOrderResponse, serde_json::Error> = serde_json::from_str(&text);
-        match json {
-            Ok(_) => return Ok(order),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
         }
     }

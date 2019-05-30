@@ -22,14 +22,6 @@ pub enum OrderStatus {
     None,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
-pub enum Currency {
-    JPY,
-    BTC,
-    ETH,
-    None,
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Board {
     pub price: f64,
@@ -60,12 +52,6 @@ pub struct Order {
     pub size: f64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Asset {
-    pub currency: Currency,
-    pub amount: f64,
-}
-
 pub trait MarketOrder {
     fn id(&self) -> String;
     fn order_type(&self) -> OrderType;
@@ -93,10 +79,3 @@ where T: MarketBoard
     fn bids(&self) -> Vec<T>;
     fn asks(&self) -> Vec<T>;
 }
-
-pub trait MarketAsset
-{
-    fn currency(&self) -> Currency;
-    fn amount(&self) -> f64;
-}
-
