@@ -50,6 +50,7 @@ pub struct Order {
     pub side: Side,
     pub price: f64,
     pub size: f64,
+    pub order_at: DateTime<Utc>,
 }
 
 pub trait MarketOrder {
@@ -59,6 +60,7 @@ pub trait MarketOrder {
     fn side(&self) -> Side;
     fn price(&self) -> f64;
     fn size(&self) -> f64;
+    fn order_at(&self) -> DateTime<Utc>;
 }
 
 pub trait MarketExecution {

@@ -1,3 +1,4 @@
+use chrono::prelude::*;
 use crate::types::atomic::{MarketOrder, Side, OrderType, OrderStatus};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -42,5 +43,10 @@ impl MarketOrder for BitFlyerOrder {
             "LIMIT" => return OrderType::Limit,
             _ => return OrderType::None,
         }
+    }
+
+    fn order_at(&self) -> DateTime<Utc> {
+        // TODO child_order_dateで正しいのかあとで確認する
+        format!("{}Z", self.child_order_date).parse::<DateTime<Utc>>().unwrap()
     }
 }

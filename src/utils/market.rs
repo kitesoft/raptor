@@ -26,6 +26,7 @@ impl MarketUtils {
             side: order.side(),
             price: order.price(),
             size: order.size(),
+            order_at: order.order_at(),
         }
     }
 
@@ -39,6 +40,7 @@ impl MarketUtils {
                 side: item.side(),
                 price: item.price(),
                 size: item.size(),
+                order_at: item.order_at(),
             });
         }
         items
