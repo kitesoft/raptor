@@ -28,6 +28,7 @@ impl Market for BitFlyer {
 
         let text = client.get(url).query(&params).send()?.text()?;
         let json: Result<BitFlyerBoards, serde_json::Error> = serde_json::from_str(&text);
+        // TODO ソートする
         match json {
             Ok(res) => return Ok(MarketUtils::to_boards(res)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
@@ -41,6 +42,7 @@ impl Market for BitFlyer {
 
         let text = client.get(url).query(&params).send()?.text()?;
         let json: Result<Vec<BitFlyerExecution>, serde_json::Error> = serde_json::from_str(&text);
+        // TODO ソートする
         match json {
             Ok(res) => return Ok(MarketUtils::to_executions(res)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
@@ -56,6 +58,7 @@ impl Market for BitFlyer {
 
         let text = client.get(url).headers(headers).send()?.text()?;
         let json: Result<Vec<BitFlyerOrder>, serde_json::Error> = serde_json::from_str(&text);
+        // TODO ソートする
         match json {
             Ok(res) => return Ok(MarketUtils::to_orders(res)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),

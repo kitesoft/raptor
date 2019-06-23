@@ -19,6 +19,13 @@ pub struct BitFlyerBoards {
 }
 
 impl MarketBoards<BitFlyerBoard> for BitFlyerBoards {
-    fn bids(&self) -> Vec<BitFlyerBoard> {self.bids.clone()}
-    fn asks(&self) -> Vec<BitFlyerBoard> {self.asks.clone()}
+    fn bids(&self) -> Vec<BitFlyerBoard> {
+        // TODO ソートする
+        self.bids.clone()
+    }
+
+    fn asks(&self) -> Vec<BitFlyerBoard> {
+        // TODO ソートする
+        self.asks.clone()
+    }
 }
