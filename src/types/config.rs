@@ -3,10 +3,12 @@ use std::fs::File;
 use std::io::prelude::*;
 
 use crate::market::bitflyer::bitflyer::BitFlyer;
+use crate::market::liquid::liquid::Liquid;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub bitflyer: BitFlyer,
+    pub liquid: Liquid,
 }
 
 impl Config {
