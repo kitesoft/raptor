@@ -25,10 +25,13 @@ impl Market for Liquid {
 
         let text = client.get(url).send()?.text()?;
         let json: Result<LiquidBoards, serde_json::Error> = serde_json::from_str(&text);
-        println!("{:?}", json);
-        // TODO ソートする
         match json {
-            Ok(res) => return Ok(MarketUtils::to_boards(res)),
+            Ok(res) => return {
+                let mut boards = MarketUtils::to_boards(res);
+                boards.bid.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                boards.ask.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                Ok(boards)
+            },
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
         }
     }
@@ -43,7 +46,6 @@ impl Market for Liquid {
 
         let text = client.get(url).query(&params).send()?.text()?;
         let json: Result<LiquidExecutions, serde_json::Error> = serde_json::from_str(&text);
-        // TODO ソートする
         match json {
             Ok(res) => return Ok(MarketUtils::to_executions(res.models)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
@@ -58,7 +60,6 @@ impl Market for Liquid {
         
         let text = client.get(url).headers(headers).send()?.text()?;
         let json: Result<LiquidOrders, serde_json::Error> = serde_json::from_str(&text);
-        // TODO ソートする
         match json {
             Ok(res) => return Ok(MarketUtils::to_orders(res.models)),
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),
@@ -81,8 +82,9 @@ mod tests {
         // let boards = liquid.boards(None);
         // println!("{:?}", boards);
 
-        // let executions = liquid.executions(None);
-        // println!("{:?}", executions.unwrap()[0]);
+        // let executions = liquid.executions(None).unwrap();
+        // println!("{:?}", executions[0]);
+        // println!("{:?}", executions.last().unwrap());
 
         // let orders = liquid.orders(None);
         // println!("{:?}", orders);

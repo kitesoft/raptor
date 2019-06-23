@@ -22,13 +22,13 @@ pub enum OrderStatus {
     None,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct Board {
     pub price: f64,
     pub size: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, PartialOrd)]
 pub struct Boards {
     pub bid: Vec<Board>,
     pub ask: Vec<Board>,
