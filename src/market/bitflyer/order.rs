@@ -46,7 +46,6 @@ impl MarketOrder for BitFlyerOrder {
     }
 
     fn order_at(&self) -> DateTime<Utc> {
-        // TODO child_order_dateで正しいのかあとで確認する
         format!("{}Z", self.child_order_date).parse::<DateTime<Utc>>().unwrap()
     }
 }
