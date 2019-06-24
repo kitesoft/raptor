@@ -86,8 +86,8 @@ mod tests {
     fn test_bitflyer() {
         let bm = Bitmex{
             symbol: "XBT".to_string(),
-            api_key: "Qb5mJQ5K8nLcqrfRE9OnAWUI".to_string(),
-            api_secret: "roFeC7m6_EQLXpMLJLxL2EyEalX2aef834Vk3Dt704wYStWj".to_string(),
+            api_key: "".to_string(),
+            api_secret: "".to_string(),
         };
 
         // let boards = bm.boards(None);
