@@ -32,7 +32,7 @@ impl Market for BitFlyer {
             Ok(res) => {
                 let mut boards = MarketUtils::to_boards(res);
                 boards.bid.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
-                boards.ask.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                boards.ask.sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
                 Ok(boards)
             },
             Err(_) => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, text))),

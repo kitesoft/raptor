@@ -31,11 +31,11 @@ impl Market for Bitmex {
         let json: Result<Vec<BitmexBoard>, serde_json::Error> = serde_json::from_str(&text);
         match json {
             Ok(res) => {
-                let mut bid: Vec<BitmexBoard> = res.iter().filter(|&x| x.side == "Sell").cloned().collect();
-                let mut ask: Vec<BitmexBoard> = res.iter().filter(|&x| x.side == "Buy").cloned().collect();
+                let mut bid: Vec<BitmexBoard> = res.iter().filter(|&x| x.side == "Buy").cloned().collect();
+                let mut ask: Vec<BitmexBoard> = res.iter().filter(|&x| x.side == "Sell").cloned().collect();
 
                 bid.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
-                ask.sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                ask.sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
 
                 Ok(Boards{
                     bid: MarketUtils::to_board(bid),
@@ -51,7 +51,7 @@ impl Market for Bitmex {
         let url: &str = "https://www.bitmex.com/api/v1/trade";
         let params = [
             ("symbol", self.symbol.clone()),
-            ("count", "100".to_string()),
+            ("count", "500".to_string()),
             ("reverse", "true".to_string()),
         ];
         
